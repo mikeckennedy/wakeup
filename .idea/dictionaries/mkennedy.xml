@@ -4,6 +4,7 @@
       <w>aiohttp</w>
       <w>chardet</w>
       <w>multidict</w>
+      <w>unsync</w>
       <w>yarl</w>
     </words>
   </dictionary>
