@@ -5,6 +5,7 @@
       <w>chardet</w>
       <w>multidict</w>
       <w>unsync</w>
+      <w>urlset</w>
       <w>yarl</w>
     </words>
   </dictionary>
