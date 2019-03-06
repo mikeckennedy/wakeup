@@ -1,33 +1,50 @@
+import argparse
 from collections import defaultdict, namedtuple
 from typing import List
 import time
 import statistics
+from colorama import Fore
 
 import aiohttp
 from xml.etree import ElementTree
 from unsync import unsync
 
+Args = namedtuple('Args', 'sitemap_url, workers, ignore_patterns')
 RequestResult = namedtuple('RequestResult', 'status, time_ms')
 
 
 def main():
-    sitemap_url = 'https://training.talkpython.fm/sitemap.xml'
-    once_patterns = ['/transcript/', ]
-    workers = 12
+    print(Fore.WHITE)
 
-    print_header(sitemap_url, workers)
+    args = get_params()
+    print_header(args.sitemap_url, args.workers)
 
     # noinspection PyUnresolvedReferences
-    sitemap = get_sitemap_text(sitemap_url).result()
+    sitemap = get_sitemap_text(args.sitemap_url).result()
     urls = get_site_mapped_urls(sitemap)
 
-    filtered_urls = get_filtered_urls(urls, once_patterns)
+    filtered_urls = get_filtered_urls(urls, args.ignore_patterns)
+    print(Fore.CYAN + "Testing {:,} total URLs.".format(len(filtered_urls)))
+
     for url in filtered_urls:
-        print("Testing url, {:,} workers: {}...".format(workers, url), flush=True)
+        print(Fore.WHITE + "Testing url, {:,} workers: {}...".format(args.workers, url), flush=True)
         # noinspection PyUnresolvedReferences
-        results = test_url(url, workers).result()
+        results = test_url(url, args.workers).result()
         summary_page_result(results)
         print()
+
+
+def get_params():
+    parser = argparse.ArgumentParser(description='Videos to images')
+    parser.add_argument('sitemap_url', type=str, help='Url for sitemap, e.g. https://site.com/sitemap.xml')
+    parser.add_argument('workers', type=int, help='Number of workers (concurrent requests)')
+    parser.add_argument("ignore_patterns", nargs='*', type=str,
+                        help="Substrings for URLs to only request once (zero or more args)",
+                        default=[])
+
+    args = parser.parse_args()
+
+    return Args(args.sitemap_url, args.workers, args.ignore_patterns)
 
 
 def print_header(sitemap_url: str, workers: int):
@@ -51,11 +68,30 @@ def summary_page_result(results: List[RequestResult]):
     times = [r.time_ms for r in results]
     min_time_ms = min(times)
     max_time_ms = max(times)
-    ave_time = statistics.mean(times)
+    med_time = statistics.median(times)
+
+    bad_statuses = False
+    for s in statuses:
+        if 400 <= s <= 599:
+            bad_statuses = True
+            break
+
+    if bad_statuses:
+        print(Fore.RED, end='')
+    else:
+        print(Fore.GREEN, end='')
 
     print("Statuses: {}".format(statuses))
-    print("Times: min: {:,.2f}, ave: {:,.2f}, max: {:,.2f}".format(
-        min_time_ms, ave_time, max_time_ms
+
+    if med_time < .5:
+        print(Fore.GREEN, end='')
+    elif med_time < 1.5:
+        print(Fore.YELLOW, end='')
+    else:
+        print(Fore.RED, end='')
+
+    print("Times: min: {:,.2f}, median: {:,.2f}, max: {:,.2f}".format(
+        min_time_ms, med_time, max_time_ms
     ))
 
 
