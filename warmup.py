@@ -1,18 +1,21 @@
 from collections import defaultdict, namedtuple
 from typing import List
 import time
+import statistics
 
 import aiohttp
 from xml.etree import ElementTree
 from unsync import unsync
 
-RequestResult = namedtuple('RequestResult', 'code, time_ms')
+RequestResult = namedtuple('RequestResult', 'status, time_ms')
 
 
 def main():
     sitemap_url = 'https://training.talkpython.fm/sitemap.xml'
     once_patterns = ['/transcript/', ]
     workers = 12
+
+    print_header(sitemap_url, workers)
 
     # noinspection PyUnresolvedReferences
     sitemap = get_sitemap_text(sitemap_url).result()
@@ -23,9 +26,37 @@ def main():
         print("Testing url, {:,} workers: {}...".format(workers, url), flush=True)
         # noinspection PyUnresolvedReferences
         results = test_url(url, workers).result()
-        for r in results:
-            print(r)
+        summary_page_result(results)
         print()
+
+
+def print_header(sitemap_url: str, workers: int):
+    start = sitemap_url.index('://') + 3
+    end = start + sitemap_url[start:].index('/')
+    domain = sitemap_url[start:end]
+
+    print()
+    print(' ---------------------------------------------------------')
+    print('|                                                         |')
+    print('|                     SITE WARM-UP                        |')
+    print('|                                                         |')
+    print(' ---------------------------------------------------------')
+    print()
+    print('Testing {} with {} workers.'.format(domain, workers))
+    print()
+
+
+def summary_page_result(results: List[RequestResult]):
+    statuses = {r.status for r in results}
+    times = [r.time_ms for r in results]
+    min_time_ms = min(times)
+    max_time_ms = max(times)
+    ave_time = statistics.mean(times)
+
+    print("Statuses: {}".format(statuses))
+    print("Times: min: {:,.2f}, ave: {:,.2f}, max: {:,.2f}".format(
+        min_time_ms, ave_time, max_time_ms
+    ))
 
 
 @unsync
@@ -47,7 +78,7 @@ async def async_get(url) -> RequestResult:
     t0 = time.time()
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
-            resp.raise_for_status()
+            # resp.raise_for_status()
             time_in_ms = time.time() - t0
 
     return RequestResult(resp.status, time_in_ms)
