@@ -1,0 +1,3 @@
+import wakeup
+
+wakeup.main()
