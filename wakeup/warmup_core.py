@@ -34,7 +34,10 @@ def main() -> Dict[str, RequestResult]:
         results = test_url(url, args.workers).result()
         summary_page_result(results)
         all_results[url] = results
-        print()
+        print(flush=True)
+
+        # Give the server a little break to handle any reuqests that may have backed up.
+        time.sleep(.05)
 
     return all_results
 
