@@ -1,6 +1,6 @@
 import argparse
 from collections import defaultdict, namedtuple
-from typing import List
+from typing import List, Dict
 import time
 import statistics
 from colorama import Fore
@@ -13,7 +13,7 @@ Args = namedtuple('Args', 'sitemap_url, workers, ignore_patterns')
 RequestResult = namedtuple('RequestResult', 'status, time_ms')
 
 
-def main():
+def main() -> Dict[str, RequestResult]:
     print(Fore.WHITE)
 
     args = get_params()
@@ -26,12 +26,17 @@ def main():
     filtered_urls = get_filtered_urls(urls, args.ignore_patterns)
     print(Fore.CYAN + "Testing {:,} total URLs.".format(len(filtered_urls)))
 
+    all_results = {}
+
     for url in filtered_urls:
         print(Fore.WHITE + "Testing url, {:,} workers: {}...".format(args.workers, url), flush=True)
         # noinspection PyUnresolvedReferences
         results = test_url(url, args.workers).result()
         summary_page_result(results)
+        all_results[url] = results
         print()
+
+    return all_results
 
 
 def get_params():
