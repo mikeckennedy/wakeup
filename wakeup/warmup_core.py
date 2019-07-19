@@ -24,12 +24,12 @@ def main() -> Dict[str, RequestResult]:
     urls = get_site_mapped_urls(sitemap)
 
     filtered_urls = get_filtered_urls(urls, args.ignore_patterns)
-    print(Fore.CYAN + "Testing {:,} total URLs.".format(len(filtered_urls)))
+    print(Fore.CYAN + f"Testing {len(filtered_urls):,} total URLs.")
 
     all_results = {}
 
     for url in filtered_urls:
-        print(Fore.WHITE + "Testing url, {:,} workers: {}...".format(args.workers, url), flush=True)
+        print(Fore.WHITE + f"Testing url, {args.workers:,} workers: {url}...", flush=True)
         # noinspection PyUnresolvedReferences
         results = test_url(url, args.workers).result()
         summary_page_result(results)
@@ -67,7 +67,7 @@ def print_header(sitemap_url: str, workers: int):
     print('|                                                         |')
     print(' ---------------------------------------------------------')
     print()
-    print('Testing {} with {} workers.'.format(domain, workers))
+    print(f'Testing {domain} with {workers} workers.')
     print()
 
 
@@ -89,7 +89,7 @@ def summary_page_result(results: List[RequestResult]):
     else:
         print(Fore.GREEN, end='')
 
-    print("Statuses: {}".format(statuses))
+    print(f"Statuses: {statuses}")
 
     if med_time < .5:
         print(Fore.GREEN, end='')
