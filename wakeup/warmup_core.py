@@ -39,11 +39,11 @@ def main() -> Dict[str, RequestResult]:
         # Give the server a little break to handle any reuqests that may have backed up.
         time.sleep(.05)
 
-    return all_results
+    return
 
 
 def get_params():
-    parser = argparse.ArgumentParser(description='Videos to images')
+    parser = argparse.ArgumentParser(description='Site warmup -- preload all public pages')
     parser.add_argument('sitemap_url', type=str, help='Url for sitemap, e.g. https://site.com/sitemap.xml')
     parser.add_argument('workers', type=int, help='Number of workers (concurrent requests)')
     parser.add_argument("ignore_patterns", nargs='*', type=str,
@@ -64,6 +64,7 @@ def print_header(sitemap_url: str, workers: int):
     print(' ---------------------------------------------------------')
     print('|                                                         |')
     print('|                     SITE WARM-UP                        |')
+    print('|           github.com/mikeckennedy/wakeup                |')
     print('|                                                         |')
     print(' ---------------------------------------------------------')
     print()
@@ -86,10 +87,7 @@ def summary_page_result(results: List[RequestResult]):
 
     if bad_statuses:
         print(Fore.RED, end='')
-    else:
-        print(Fore.GREEN, end='')
-
-    print(f"Statuses: {statuses}")
+        print(f"Statuses: {statuses}")
 
     if med_time < .5:
         print(Fore.GREEN, end='')
@@ -122,7 +120,6 @@ async def async_get(url) -> RequestResult:
     t0 = time.time()
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
-            # resp.raise_for_status()
             time_in_ms = time.time() - t0
 
     return RequestResult(resp.status, time_in_ms)

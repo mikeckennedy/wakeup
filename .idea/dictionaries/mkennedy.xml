@@ -4,6 +4,7 @@
       <w>aiohttp</w>
       <w>chardet</w>
       <w>colorama</w>
+      <w>mikeckennedy</w>
       <w>multidict</w>
       <w>unsync</w>
       <w>urlset</w>
