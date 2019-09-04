@@ -36,10 +36,8 @@ def main() -> Dict[str, RequestResult]:
         all_results[url] = results
         print(flush=True)
 
-        # Give the server a little break to handle any reuqests that may have backed up.
+        # Give the server a little break to handle any requests that may have backed up.
         time.sleep(.05)
-
-    return
 
 
 def get_params():
