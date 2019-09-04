@@ -13,7 +13,7 @@ Args = namedtuple('Args', 'sitemap_url, workers, ignore_patterns')
 RequestResult = namedtuple('RequestResult', 'status, time_ms')
 
 
-def main() -> Dict[str, RequestResult]:
+def main():
     print(Fore.WHITE)
 
     args = get_params()
