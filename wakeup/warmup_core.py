@@ -28,8 +28,9 @@ def main():
 
     all_results = {}
 
-    for url in filtered_urls:
-        print(Fore.WHITE + f"Testing url, {args.workers:,} workers: {url}...", flush=True)
+    total = len(filtered_urls)
+    for idx, url in enumerate(filtered_urls, start=1):
+        print(Fore.WHITE + f"{idx}/{total}: Testing url, {args.workers:,} workers: {url}...", flush=True)
         # noinspection PyUnresolvedReferences
         results = test_url(url, args.workers).result()
         summary_page_result(results)
