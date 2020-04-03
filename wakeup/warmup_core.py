@@ -1,12 +1,12 @@
 import argparse
-from collections import defaultdict, namedtuple
-from typing import List, Dict
-import time
 import statistics
-from colorama import Fore
+import time
+from collections import defaultdict, namedtuple
+from typing import List
+from xml.etree import ElementTree
 
 import aiohttp
-from xml.etree import ElementTree
+from colorama import Fore
 from unsync import unsync
 
 Args = namedtuple('Args', 'sitemap_url, workers, ignore_patterns')
@@ -24,15 +24,32 @@ def main():
     urls = get_site_mapped_urls(sitemap)
 
     filtered_urls = get_filtered_urls(urls, args.ignore_patterns)
-    print(Fore.CYAN + f"Testing {len(filtered_urls):,} total URLs.")
 
+    print(Fore.YELLOW + f"Testing {len(filtered_urls):,} total URLs.")
+    print()
+    print()
+    print(Fore.WHITE + "*" * 50)
+    print()
+    print(Fore.LIGHTGREEN_EX + 'Running with one worker to wake systems...'.upper() + Fore.WHITE)
+    print()
+    run_url_requests(1, filtered_urls, Fore.LIGHTGREEN_EX + 'First request')
+    print()
+    print("*" * 50)
+    print()
+    print(Fore.WHITE + Fore.YELLOW + f'Running full power with {args.workers} workers...'.upper() + Fore.WHITE)
+    print()
+    run_url_requests(args.workers, filtered_urls, Fore.LIGHTRED_EX + 'Full power')
+
+
+def run_url_requests(workers: int, filtered_urls: List[str], prefix: str):
     all_results = {}
-
     total = len(filtered_urls)
     for idx, url in enumerate(filtered_urls, start=1):
-        print(Fore.WHITE + f"{idx}/{total}: Testing url, {args.workers:,} workers: {url}...", flush=True)
+        if prefix:
+            print(prefix, end=': ')
+        print(Fore.WHITE + f"{idx}/{total}: Testing url, {workers:,} workers: {url}...", flush=True)
         # noinspection PyUnresolvedReferences
-        results = test_url(url, args.workers).result()
+        results = test_url(url, workers).result()
         summary_page_result(results)
         all_results[url] = results
         print(flush=True)
