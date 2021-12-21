@@ -153,7 +153,6 @@ async def test_url(url: str, workers: int) -> List[RequestResult]:
 @unsync
 async def async_get(url) -> RequestResult:
     headers = {'User-Agent': USER_AGENT}
-    url = url.replace('https://training.talkpython.fm/', 'http://127.0.0.1:6544/')
 
     t0 = time.time()
     async with aiohttp.ClientSession() as session:
