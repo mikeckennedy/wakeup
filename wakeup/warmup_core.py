@@ -29,6 +29,7 @@ def __get_platform():
 
 VER: sys.version_info = sys.version_info
 PLATFORM: Final[str] = __get_platform()
+USER_AGENT: Final[str] = f'Warmup client; {PLATFORM}; Python {VER.major}.{VER.minor}.{VER.micro}'
 
 
 def main():
@@ -151,9 +152,7 @@ async def test_url(url: str, workers: int) -> List[RequestResult]:
 
 @unsync
 async def async_get(url) -> RequestResult:
-    headers = {
-        'User-Agent': f'Warmup client; {PLATFORM}; Python {VER.major}.{VER.minor}.{VER.micro}'
-    }
+    headers = {'User-Agent': USER_AGENT}
 
     t0 = time.time()
     async with aiohttp.ClientSession() as session:
