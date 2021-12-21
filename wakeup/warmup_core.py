@@ -1,8 +1,9 @@
 import argparse
 import statistics
+import sys
 import time
 from collections import defaultdict, namedtuple
-from typing import List
+from typing import List, Final
 from xml.etree import ElementTree
 
 import aiohttp
@@ -11,6 +12,23 @@ from unsync import unsync
 
 Args = namedtuple('Args', 'sitemap_url, workers, ignore_patterns')
 RequestResult = namedtuple('RequestResult', 'status, time_ms')
+
+
+def __get_platform():
+    platforms = {
+        'linux1': 'Linux',
+        'linux2': 'Linux',
+        'darwin': 'OS X',
+        'win32': 'Windows'
+    }
+    if sys.platform not in platforms:
+        return sys.platform
+
+    return platforms[sys.platform]
+
+
+VER: sys.version_info = sys.version_info
+PLATFORM: Final[str] = __get_platform()
 
 
 def main():
@@ -133,9 +151,13 @@ async def test_url(url: str, workers: int) -> List[RequestResult]:
 
 @unsync
 async def async_get(url) -> RequestResult:
+    headers = {
+        'User-Agent': f'Warmup client; {PLATFORM}; Python {VER.major}.{VER.minor}.{VER.micro}'
+    }
+
     t0 = time.time()
     async with aiohttp.ClientSession() as session:
-        async with session.get(url) as resp:
+        async with session.get(url, headers=headers) as resp:
             time_in_ms = time.time() - t0
 
     return RequestResult(resp.status, time_in_ms)
